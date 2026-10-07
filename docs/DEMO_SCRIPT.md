@@ -4,20 +4,20 @@ Before presenting: restart the backend (clean state), open the app, hit /api/hea
 close other tabs, zoom the browser to 125%.
 
 1. Home (15s): "This is SkillBridge AI. 16 students and 5 local businesses are on the platform."
-2. Post a project (45s): choose Spice Route Kitchen → "Use sample description" → read it aloud.
+2. Post a project (45s): choose Spice Route Kitchen → "Use a sample request" → read it aloud.
    "Notice: the owner never says React or HTML. They just describe their problem."
-   Click Analyze with AI → point at the extracted skills, budget, duration and the "AI extracted" badge.
-3. Matches (60s): Publish → "In two stages: a transparent skill score shortlists students, then the AI
+   Click "Find required skills" → point at the extracted skills, budget, duration and the "Extracted by AI" tag.
+3. Matches (60s): "Publish and match" → "In two stages: a transparent skill score shortlists students, then the AI
    reads their full profiles and past work." Point at #1: match %, the reason, green skills, amber gaps.
    "Gaps are shown honestly, so the business knows exactly what it's getting."
 4. Offer + accept (40s): Send offer to #1 → "Students aren't assigned; they choose." → Open Ananya's view →
-   "This is what Ananya sees" → Accept.
-5. Complete (25s): "Two weeks later the site is delivered" → 5 stars → Mark complete → point at the split:
+   "This is what Ananya sees" → "Accept offer".
+5. Complete (25s): "Two weeks later the site is delivered" → 5 out of 5 → "Mark complete" → point at the split:
    "₹7,200 to Ananya, ₹800 platform fee. That's our business model, live."
 6. Certificate (30s): View certificate → "A certificate with a unique ID that anyone can check at this link."
    Click View portfolio → "It shows up as a Verified entry in her portfolio. That's real experience."
 
-If the AI is slow or offline: the badges switch to "Keyword fallback / Rule-based ranking" and the flow still
+If the AI is slow or offline: the tags switch to "Keyword fallback" and "Skill score only" and the flow still
 works. Say: "The system is built to degrade gracefully. This is the deterministic fallback."
 
 ## Likely questions
