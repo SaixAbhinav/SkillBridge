@@ -1,0 +1,7 @@
+[
+  {"id": "B01", "name": "Spice Route Kitchen", "type": "Restaurant", "city": "Hyderabad"},
+  {"id": "B02", "name": "Bloom Boutique", "type": "Clothing store", "city": "Secunderabad"},
+  {"id": "B03", "name": "FitZone Gym", "type": "Fitness studio", "city": "Gachibowli"},
+  {"id": "B04", "name": "GreenLeaf Organics", "type": "D2C startup", "city": "Hyderabad"},
+  {"id": "B05", "name": "TechNest Solutions", "type": "SaaS startup", "city": "Hitech City"}
+]
