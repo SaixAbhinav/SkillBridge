@@ -4,15 +4,19 @@ export default function App() {
   return (
     <>
       <header className="nav no-print">
-        <Link to="/" className="logo">Skill<span>Bridge</span> AI</Link>
+        <Link to="/" className="wordmark">SkillBridge<span>ai</span></Link>
         <nav>
-          <NavLink to="/post">Post a project</NavLink>
-          <NavLink to="/students">Students</NavLink>
+          <NavLink to="/students" className="navlink">Students</NavLink>
+          <Link to="/post" className="btn primary sm">Post a project</Link>
         </nav>
       </header>
       <main className="container">
         <Outlet />
       </main>
+      <footer className="footer no-print">
+        <span>SkillBridge AI, a course prototype</span>
+        <span>Payments on this demo are simulated</span>
+      </footer>
     </>
   )
 }

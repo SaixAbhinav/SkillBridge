@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { ArrowRight, SealCheck } from '@phosphor-icons/react'
 import { api } from '../api'
 import MatchCard from '../components/MatchCard'
 import SkillChips from '../components/SkillChips'
+import { inr } from '../format'
 
 export default function ProjectMatches() {
   const { id } = useParams()
@@ -46,72 +48,85 @@ export default function ProjectMatches() {
   }
 
   if (error) return <p className="error">{error}</p>
-  if (!detail) return <p className="muted">Loading project…</p>
+  if (!detail) return <div className="narrow"><div className="skeleton" /></div>
 
   const { project, business, offered_student: offered, assigned_student: assigned } = detail
-  const inr = (n) => `₹${n.toLocaleString('en-IN')}`
 
   return (
     <div className="narrow">
-      <div className="card">
-        <p className="eyebrow">{business.name} · {business.city}</p>
+      <header className="project-head">
+        <p className="muted">{business.name}, {business.city}</p>
         <h1>{project.title}</h1>
         <p className="muted">{project.summary}</p>
         <SkillChips skills={project.required_skills} />
-        <p className="meta">
-          {inr(project.budget_inr)} · {project.duration_weeks} week(s) · {project.hours_per_week} hrs/week · {project.difficulty}
-        </p>
-      </div>
+        <div className="facts">
+          <span>Budget <b>{inr(project.budget_inr)}</b></span>
+          <span>Duration <b>{project.duration_weeks} wk</b></span>
+          <span>Effort <b>{project.hours_per_week} h/wk</b></span>
+          <span>Level <b>{project.difficulty}</b></span>
+        </div>
+      </header>
 
       {project.status === 'offered' && offered && (
-        <div className="card highlight">
+        <div className="callout reveal">
           <h2>Offer sent to {offered.name}</h2>
-          <p className="muted">Waiting for {offered.name} to accept or decline.</p>
-          <Link className="btn" to={`/students/${offered.id}`}>Open {offered.name}'s view →</Link>
+          <p className="muted">Waiting for {offered.name.split(' ')[0]} to accept or decline.</p>
+          <div><Link className="btn sm" to={`/students/${offered.id}`}>Open {offered.name.split(' ')[0]}'s view <ArrowRight size={14} weight="bold" /></Link></div>
         </div>
       )}
 
       {project.status === 'assigned' && assigned && (
-        <div className="card highlight">
-          <h2>Assigned to {assigned.name}</h2>
-          <p className="muted">When the work is delivered, rate it to release payment and issue a verified certificate.</p>
+        <div className="callout reveal">
+          <h2>{assigned.name} is working on this</h2>
+          <p className="muted">When the work is delivered, rate it. That releases the payout and issues a certificate.</p>
           <div className="row">
-            <select value={rating} onChange={(e) => setRating(Number(e.target.value))}>
-              {[5, 4, 3, 2, 1].map((r) => <option key={r} value={r}>{'★'.repeat(r)} ({r})</option>)}
+            <select value={rating} onChange={(e) => setRating(Number(e.target.value))} aria-label="Rating">
+              {[5, 4, 3, 2, 1].map((r) => <option key={r} value={r}>{r} out of 5</option>)}
             </select>
-            <button className="btn primary" disabled={busy} onClick={complete}>Mark complete & issue certificate</button>
+            <button className="btn primary" disabled={busy} onClick={complete}>Mark complete</button>
           </div>
         </div>
       )}
 
       {project.status === 'completed' && (
-        <div className="card highlight">
-          <h2>Completed ✓</h2>
-          <p>
-            Payout to student: <strong>{inr(project.student_payout_inr)}</strong> · Platform fee (10%): {inr(project.platform_fee_inr)}
-            <span className="small muted"> (simulated)</span>
-          </p>
-          <Link className="btn" to={`/certificate/${project.certificate_id}`}>View certificate</Link>
+        <div className="callout reveal">
+          <h2 className="row"><SealCheck size={20} weight="fill" color="var(--accent)" /> Completed</h2>
+          <div className="facts">
+            <span>Paid to student <b>{inr(project.student_payout_inr)}</b></span>
+            <span>Platform fee, 10% <b>{inr(project.platform_fee_inr)}</b></span>
+            <span className="faint">Simulated payment</span>
+          </div>
+          <div><Link className="btn sm" to={`/certificate/${project.certificate_id}`}>View certificate</Link></div>
         </div>
       )}
 
-      <div className="row-between">
-        <h2>Top matches</h2>
-        {matches && <span className={`badge ${aiUsed ? 'ai' : ''}`}>{aiUsed ? 'AI-ranked' : 'Rule-based ranking'}</span>}
-      </div>
-      {!matches && <p className="muted">AI is ranking students for this project…</p>}
-      {matches?.length === 0 && <p className="muted">No students match these skills yet.</p>}
-      {matches?.map((m, i) => (
-        <MatchCard
-          key={m.student_id}
-          rank={i + 1}
-          match={m}
-          canOffer={project.status === 'open'}
-          declined={project.declined_student_ids.includes(m.student_id)}
-          disabled={busy}
-          onOffer={() => sendOffer(m.student_id)}
-        />
-      ))}
+      <section className="section">
+        <div className="row-between" style={{ marginBottom: 14 }}>
+          <h2>Best matches</h2>
+          {matches && <span className={`tag ${aiUsed ? 'on' : ''}`}>{aiUsed ? 'Ranked by AI' : 'Skill score only'}</span>}
+        </div>
+        {!matches && (
+          <div className="match-list">
+            <p className="small muted">Ranking students for this project</p>
+            {[0, 1, 2].map((i) => <div key={i} className="skeleton" />)}
+          </div>
+        )}
+        {matches?.length === 0 && <p className="muted">No students list these skills yet. Try editing the required skills.</p>}
+        <div className="match-list">
+          {matches?.map((m, i) => (
+            <MatchCard
+              key={m.student_id}
+              rank={i + 1}
+              match={m}
+              style={{ '--i': i }}
+              canOffer={project.status === 'open'}
+              declined={project.declined_student_ids.includes(m.student_id)}
+              disabled={busy}
+              onOffer={() => sendOffer(m.student_id)}
+            />
+          ))}
+        </div>
+      </section>
     </div>
   )
 }

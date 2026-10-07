@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ArrowRight, Sparkle } from '@phosphor-icons/react'
 import { api } from '../api'
 import SkillChips from '../components/SkillChips'
 
@@ -62,59 +63,66 @@ export default function PostProject() {
 
   return (
     <div className="narrow">
-      <h1>Post a project</h1>
-      <div className="card form">
-        <label>
-          Business
+      <div className="page-head">
+        <h1>Post a project</h1>
+        <p className="muted">Describe the work the way you would explain it to a friend. We will work out the skills.</p>
+      </div>
+
+      <div className="panel form">
+        <label className="field">
+          <span>Business</span>
           <select value={businessId} onChange={(e) => { setBusinessId(e.target.value); changeDescription('') }}>
             {businesses.map((b) => <option key={b.id} value={b.id}>{b.name} ({b.type})</option>)}
           </select>
         </label>
-        <label>
-          Describe what you need, in your own words
+        <label className="field">
+          <span>What do you need?</span>
           <textarea
             rows={5}
             value={description}
             onChange={(e) => changeDescription(e.target.value)}
-            placeholder="e.g. I need a website for my restaurant with our menu and online ordering…"
+            placeholder="For example: a website for my restaurant with our menu and online ordering"
           />
+          <small>Mention a budget and a deadline if you have them.</small>
         </label>
-        {SAMPLES[businessId] && (
-          <button type="button" className="link" onClick={() => changeDescription(SAMPLES[businessId])}>
-            Use sample description
+        <div className="row-between">
+          {SAMPLES[businessId]
+            ? <button type="button" className="link" onClick={() => changeDescription(SAMPLES[businessId])}>Use a sample request</button>
+            : <span />}
+          <button className="btn primary" disabled={busy || description.trim().length < 10} onClick={analyze}>
+            <Sparkle size={16} weight="fill" /> {busy && !req ? 'Reading request' : 'Find required skills'}
           </button>
-        )}
-        <button className="btn primary" disabled={busy || description.trim().length < 10} onClick={analyze}>
-          {busy && !req ? 'Analyzing…' : 'Analyze with AI'}
-        </button>
+        </div>
       </div>
 
       {req && (
-        <div className="card form">
+        <div className="panel form reveal">
           <div className="row-between">
-            <h2>Extracted requirements</h2>
-            <span className={`badge ${aiUsed ? 'ai' : ''}`}>{aiUsed ? 'AI extracted' : 'Keyword fallback'}</span>
+            <h2>Requirements</h2>
+            <span className={`tag ${aiUsed ? 'on' : ''}`}>{aiUsed ? 'Extracted by AI' : 'Keyword fallback'}</span>
           </div>
-          <label>Title<input value={req.title} onChange={update('title')} /></label>
-          <label>Summary<input value={req.summary} onChange={update('summary')} /></label>
-          <div>
-            <strong className="small">Required skills</strong>
+          <label className="field"><span>Title</span><input value={req.title} onChange={update('title')} /></label>
+          <label className="field"><span>Summary</span><input value={req.summary} onChange={update('summary')} /></label>
+          <div className="field">
+            <span>Required skills</span>
             <SkillChips skills={req.required_skills} editable onChange={(skills) => setReq({ ...req, required_skills: skills })} />
           </div>
           <div className="grid-3">
-            <label>Budget (₹)<input type="number" min={0} value={req.budget_inr} onChange={update('budget_inr', true)} /></label>
-            <label>Duration (weeks)<input type="number" min={1} max={12} value={req.duration_weeks} onChange={update('duration_weeks', true)} /></label>
-            <label>Hours / week<input type="number" min={1} max={40} value={req.hours_per_week} onChange={update('hours_per_week', true)} /></label>
+            <label className="field"><span>Budget (₹)</span><input type="number" min={0} value={req.budget_inr} onChange={update('budget_inr', true)} /></label>
+            <label className="field"><span>Duration (weeks)</span><input type="number" min={1} max={12} value={req.duration_weeks} onChange={update('duration_weeks', true)} /></label>
+            <label className="field"><span>Hours per week</span><input type="number" min={1} max={40} value={req.hours_per_week} onChange={update('hours_per_week', true)} /></label>
           </div>
-          <label>
-            Difficulty
+          <label className="field">
+            <span>Difficulty</span>
             <select value={req.difficulty} onChange={update('difficulty')}>
               {DIFFICULTIES.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
           </label>
-          <button className="btn primary" disabled={busy || req.required_skills.length === 0} onClick={publish}>
-            {busy ? 'Publishing…' : 'Publish & find students'}
-          </button>
+          <div className="row" style={{ justifyContent: 'flex-end' }}>
+            <button className="btn primary" disabled={busy || req.required_skills.length === 0} onClick={publish}>
+              {busy ? 'Publishing' : 'Publish and match'} <ArrowRight size={16} weight="bold" />
+            </button>
+          </div>
         </div>
       )}
 

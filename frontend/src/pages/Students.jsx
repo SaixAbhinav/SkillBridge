@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
 import SkillChips from '../components/SkillChips'
+import { Avatar, Rating } from '../components/bits'
 
 export default function Students() {
-  const [students, setStudents] = useState([])
+  const [students, setStudents] = useState(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -12,21 +13,28 @@ export default function Students() {
   }, [])
 
   return (
-    <div>
-      <h1>Students</h1>
+    <>
+      <div className="page-head">
+        <h1>Students</h1>
+        <p className="muted">Skills are self-declared. Completed projects carry a verifiable certificate.</p>
+      </div>
       {error && <p className="error">{error}</p>}
-      <div className="grid">
-        {students.map((s) => (
-          <Link key={s.id} to={`/students/${s.id}`} className="card student-card">
-            <strong>{s.name}</strong>
-            <span className="small muted">{s.college} · Year {s.year}</span>
+      {!students && !error && <div className="people">{[0, 1, 2, 3].map((i) => <div key={i} className="skeleton" />)}</div>}
+      <div className="people">
+        {students?.map((s, i) => (
+          <Link key={s.id} to={`/students/${s.id}`} className="person reveal" style={{ '--i': i }}>
+            <div className="person-head">
+              <Avatar name={s.name} />
+              <div>
+                <div className="name">{s.name}</div>
+                <div className="small muted">{s.college}, year {s.year}</div>
+              </div>
+            </div>
             <SkillChips skills={Object.keys(s.skills).slice(0, 4)} />
-            <span className="small">
-              {s.completed_projects > 0 ? `★ ${s.rating} · ${s.completed_projects} projects` : 'New talent'}
-            </span>
+            <Rating student={s} />
           </Link>
         ))}
       </div>
-    </div>
+    </>
   )
 }
