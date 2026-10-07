@@ -1,0 +1,109 @@
+:root {
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --text: #1c1f2a;
+  --muted: #646a7d;
+  --border: #e3e6ef;
+  --primary: #4f46e5;
+  --primary-soft: #eef0ff;
+  --good: #0f9d6b;
+  --good-soft: #e6f7f0;
+  --gap: #b45309;
+  --gap-soft: #fdf3e3;
+  --radius: 12px;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); }
+a { color: var(--primary); text-decoration: none; }
+h1 { font-size: 2rem; margin: 0.4rem 0 0.8rem; line-height: 1.2; }
+h2 { font-size: 1.25rem; margin: 1.6rem 0 0.8rem; }
+h3 { margin: 0.4rem 0; }
+
+.nav { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+.nav nav { display: flex; gap: 20px; }
+.nav nav a { color: var(--muted); font-weight: 500; }
+.nav nav a.active { color: var(--primary); }
+.logo { font-weight: 800; font-size: 1.2rem; color: var(--text); }
+.logo span { color: var(--primary); }
+
+.container { max-width: 1040px; margin: 0 auto; padding: 24px 16px 64px; }
+.narrow { max-width: 760px; margin: 0 auto; }
+
+.hero { padding: 40px 0 24px; }
+.hero h1 { font-size: 2.4rem; }
+.lead { font-size: 1.1rem; color: var(--muted); max-width: 640px; }
+.eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; font-weight: 700; color: var(--primary); margin: 0; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+.card.highlight { border-color: var(--primary); background: var(--primary-soft); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.grid .card { margin-bottom: 0; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.stats { margin: 24px 0; }
+.stat strong { display: block; font-size: 1.6rem; }
+.stat span { color: var(--muted); font-size: 0.9rem; }
+.step-num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); font-weight: 700; }
+.student-card { display: flex; flex-direction: column; gap: 8px; color: var(--text); }
+.student-card:hover { border-color: var(--primary); }
+
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.row-between { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.grow { flex: 1; }
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+.meta { color: var(--muted); font-size: 0.9rem; margin-top: 12px; }
+.error { color: #c0262d; font-weight: 500; }
+
+.btn { display: inline-block; padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-weight: 600; cursor: pointer; }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.link { background: none; border: none; padding: 0; color: var(--primary); font: inherit; cursor: pointer; text-align: left; }
+
+.form { display: flex; flex-direction: column; gap: 14px; }
+.form label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 0.9rem; }
+input, select, textarea { font: inherit; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+textarea { resize: vertical; }
+
+.badge { font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--border); color: var(--muted); white-space: nowrap; }
+.badge.ai { background: var(--primary-soft); color: var(--primary); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; align-items: center; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); font-size: 0.85rem; font-weight: 500; }
+.chip.good { background: var(--good-soft); color: var(--good); }
+.chip.gap { background: var(--gap-soft); color: var(--gap); }
+.chip button { border: none; background: none; color: inherit; cursor: pointer; font-size: 1rem; line-height: 1; padding: 0 0 0 2px; }
+.chip-add input { padding: 4px 10px; border-radius: 999px; font-size: 0.85rem; width: 130px; }
+
+.match-head { display: flex; align-items: center; gap: 14px; }
+.rank { font-weight: 800; color: var(--muted); font-size: 1.1rem; }
+.name { font-weight: 700; font-size: 1.1rem; color: var(--text); }
+.score { text-align: right; }
+.score strong { display: block; font-size: 1.6rem; color: var(--primary); }
+.bar { height: 8px; background: var(--border); border-radius: 999px; overflow: hidden; margin: 12px 0; }
+.bar > div { height: 100%; background: linear-gradient(90deg, var(--primary), #7c74ff); border-radius: 999px; transition: width 0.6s ease; }
+.small-bar { height: 6px; margin: 0; flex: 1; }
+.skill-row { display: flex; align-items: center; gap: 14px; margin: 10px 0; }
+.skill-row span { width: 170px; }
+.portfolio-item { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 12px 0; border-top: 1px solid var(--border); }
+
+.certificate { background: #fff; border: 2px solid var(--primary); border-radius: 16px; padding: 48px 40px; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(79, 70, 229, 0.08); }
+.certificate h1 { font-size: 2.4rem; margin: 12px 0; }
+.certificate .chips { justify-content: center; }
+.stars { color: #f5a524; font-size: 1.4rem; letter-spacing: 2px; }
+.cert-foot { display: flex; justify-content: space-between; margin-top: 28px; padding-top: 16px; border-top: 1px dashed var(--border); color: var(--muted); font-size: 0.9rem; }
+
+@media (max-width: 640px) {
+  .hero h1 { font-size: 1.8rem; }
+  .grid-3 { grid-template-columns: 1fr; }
+  .certificate { padding: 32px 18px; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body, :root { background: #fff; }
+  .certificate { box-shadow: none; }
+}
