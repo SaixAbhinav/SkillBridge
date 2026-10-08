@@ -80,18 +80,29 @@ def create_app(store: Store | None = None) -> FastAPI:
     def get_student(student_id: str):
         return get_or_404(store.students, student_id, "Student")
 
-    @app.get("/api/students/{student_id}/offers")
-    def student_offers(student_id: str):
+    @app.get("/api/students/{student_id}/projects")
+    def student_projects(student_id: str):
         get_or_404(store.students, student_id, "Student")
-        return [
-            {"project": p, "business": store.businesses[p.business_id]}
-            for p in store.projects.values()
-            if p.status == "offered" and p.offered_student_id == student_id
-        ]
+
+        def with_business(p: Project) -> dict:
+            return {"project": p, "business": store.businesses[p.business_id]}
+
+        newest = sorted(store.projects.values(), key=lambda p: p.created_at, reverse=True)
+        return {
+            "offers": [with_business(p) for p in newest if p.status == "offered" and p.offered_student_id == student_id],
+            "active": [with_business(p) for p in newest if p.status == "assigned" and p.assigned_student_id == student_id],
+            "completed": [with_business(p) for p in newest if p.status == "completed" and p.assigned_student_id == student_id],
+        }
 
     @app.get("/api/businesses")
     def list_businesses():
         return list(store.businesses.values())
+
+    @app.get("/api/businesses/{business_id}/projects")
+    def business_projects(business_id: str):
+        get_or_404(store.businesses, business_id, "Business")
+        mine = [p for p in store.projects.values() if p.business_id == business_id]
+        return sorted(mine, key=lambda p: p.created_at, reverse=True)
 
     @app.post("/api/projects/extract")
     def extract(body: ExtractRequest):

@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowRight, SealCheck } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, SealCheck } from '@phosphor-icons/react'
 import { api } from '../api'
 import MatchCard from '../components/MatchCard'
 import SkillChips from '../components/SkillChips'
 import { inr } from '../format'
+import { useSession } from '../session'
 
 export default function ProjectMatches() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const session = useSession()
   const [detail, setDetail] = useState(null)
   const [matches, setMatches] = useState(null)
   const [aiUsed, setAiUsed] = useState(false)
@@ -36,6 +38,11 @@ export default function ProjectMatches() {
     }
   }
 
+  function viewAsStudent(studentId) {
+    session.update({ mode: 'student', studentId })
+    navigate(`/student/projects/${id}`)
+  }
+
   async function complete() {
     setBusy(true)
     try {
@@ -54,6 +61,7 @@ export default function ProjectMatches() {
 
   return (
     <div className="narrow">
+      <Link className="link back" to="/business"><ArrowLeft size={14} weight="bold" /> Your projects</Link>
       <header className="project-head">
         <p className="muted">{business.name}, {business.city}</p>
         <h1>{project.title}</h1>
@@ -71,7 +79,11 @@ export default function ProjectMatches() {
         <div className="callout reveal">
           <h2>Offer sent to {offered.name}</h2>
           <p className="muted">Waiting for {offered.name.split(' ')[0]} to accept or decline.</p>
-          <div><Link className="btn sm" to={`/students/${offered.id}`}>Open {offered.name.split(' ')[0]}'s view <ArrowRight size={14} weight="bold" /></Link></div>
+          <div>
+            <button className="btn sm" onClick={() => viewAsStudent(offered.id)}>
+              Switch to {offered.name.split(' ')[0]}'s view <ArrowRight size={14} weight="bold" />
+            </button>
+          </div>
         </div>
       )}
 

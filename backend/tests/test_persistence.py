@@ -44,7 +44,7 @@ def test_state_is_shared_across_instances(fake_redis):
     detail = second.get(f"/api/projects/{project['id']}")
     assert detail.status_code == 200
     assert detail.json()["project"]["status"] == "offered"
-    assert [o["project"]["id"] for o in second.get("/api/students/S01/offers").json()] == [project["id"]]
+    assert [o["project"]["id"] for o in second.get("/api/students/S01/projects").json()["offers"]] == [project["id"]]
 
 
 def test_reads_do_not_write(fake_redis):

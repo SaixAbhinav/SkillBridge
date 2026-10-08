@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Sparkle } from '@phosphor-icons/react'
 import { api } from '../api'
 import SkillChips from '../components/SkillChips'
+import { useSession } from '../session'
 
 const SAMPLES = {
   B01: 'I run a small restaurant in Hyderabad called Spice Route Kitchen. We need a website with our menu, photos and WhatsApp ordering. Budget ₹8,000, needs to be done in 2 weeks.',
@@ -15,17 +16,12 @@ const DIFFICULTIES = ['beginner', 'intermediate', 'advanced']
 
 export default function PostProject() {
   const navigate = useNavigate()
-  const [businesses, setBusinesses] = useState([])
-  const [businessId, setBusinessId] = useState('B01')
+  const { businessId, business } = useSession()
   const [description, setDescription] = useState('')
   const [req, setReq] = useState(null)
   const [aiUsed, setAiUsed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-
-  useEffect(() => {
-    api.businesses().then(setBusinesses).catch((e) => setError(e.message))
-  }, [])
 
   function changeDescription(text) {
     setDescription(text)
@@ -65,16 +61,12 @@ export default function PostProject() {
     <div className="narrow">
       <div className="page-head">
         <h1>Post a project</h1>
-        <p className="muted">Describe the work the way you would explain it to a friend. We will work out the skills.</p>
+        <p className="muted">
+          Posting as <strong>{business?.name ?? businessId}</strong>. Describe the work the way you would explain it to a friend.
+        </p>
       </div>
 
       <div className="panel form">
-        <label className="field">
-          <span>Business</span>
-          <select value={businessId} onChange={(e) => { setBusinessId(e.target.value); changeDescription('') }}>
-            {businesses.map((b) => <option key={b.id} value={b.id}>{b.name} ({b.type})</option>)}
-          </select>
-        </label>
         <label className="field">
           <span>What do you need?</span>
           <textarea

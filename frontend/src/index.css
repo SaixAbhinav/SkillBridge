@@ -211,6 +211,46 @@ a.name:hover { color: var(--accent); }
 .cert-meta b { font-family: var(--mono); font-weight: 500; font-size: 0.92rem; }
 .stars { display: inline-flex; gap: 2px; color: var(--accent); }
 
+/* ---------- Mode switch ---------- */
+.nav-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.switch { display: inline-flex; padding: 3px; gap: 2px; background: var(--sunken); border-radius: var(--radius); }
+.switch button { height: 30px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: var(--text-2); font: inherit; font-weight: 550; font-size: 0.85rem; cursor: pointer; transition: background 0.2s var(--ease), color 0.2s var(--ease); }
+.switch button[aria-pressed='true'] { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgb(23 23 26 / 0.12); }
+.persona { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; }
+.persona select { height: 34px; padding: 0 8px; font-size: 0.85rem; max-width: 190px; background: var(--surface); }
+
+/* ---------- Lists, offers ---------- */
+.back { font-size: 0.88rem; margin-bottom: 18px; }
+.list { display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.list-row { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-bottom: 1px solid var(--line); transition: background 0.15s; }
+.list-row:last-child { border-bottom: 0; }
+.list-row:hover { background: var(--sunken); }
+.list-row .chips { margin-top: 8px; }
+.empty { display: grid; gap: 12px; justify-items: start; padding: 28px; border: 1px dashed var(--line-strong); border-radius: var(--radius); }
+.count { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; margin-left: 6px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-family: var(--mono); font-size: 0.75rem; vertical-align: 2px; }
+.offer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.offer-card { display: grid; gap: 10px; padding: 20px; border: 1px solid var(--accent); background: var(--accent-soft); border-radius: var(--radius); transition: transform 0.2s var(--ease); }
+.offer-card:hover { transform: translateY(-2px); }
+.offer-title { font-size: 1.1rem; letter-spacing: -0.02em; }
+
+.offer-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; align-items: start; margin-top: 20px; }
+.offer-main { display: grid; gap: 32px; }
+.offer-main h2 { margin-bottom: 12px; }
+.quote { margin: 0; padding: 4px 0 4px 18px; border-left: 3px solid var(--accent); font-size: 1.05rem; line-height: 1.6; max-width: 62ch; }
+.skill-split { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.skill-split p { margin-bottom: 8px; }
+.why { display: flex; gap: 18px; align-items: baseline; }
+.why strong { font-size: 2rem; font-weight: 500; letter-spacing: -0.05em; color: var(--accent); }
+.why strong small { font-size: 1rem; color: var(--text-3); }
+.offer-aside { position: sticky; top: 84px; display: grid; gap: 2px; }
+.payout { font-size: 2.2rem; letter-spacing: -0.05em; margin: 2px 0 12px; }
+.kv { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 0.9rem; }
+.kv span { color: var(--text-2); }
+.kv b { font-family: var(--mono); font-weight: 500; }
+.warn { display: flex; gap: 6px; align-items: flex-start; color: var(--accent); margin-top: 10px; }
+.warn svg { flex: none; margin-top: 3px; }
+.aside-actions { display: grid; gap: 8px; margin-top: 18px; }
+
 /* ---------- Motion (reveal order mirrors ranking order) ---------- */
 @media (prefers-reduced-motion: no-preference) {
   .reveal { animation: rise 0.6s var(--ease) both; animation-delay: calc(var(--i, 0) * 60ms); }
@@ -230,10 +270,17 @@ a.name:hover { color: var(--accent); }
   .stat { border-bottom: 1px solid var(--line); }
   .steps li { grid-template-columns: 1fr; gap: 4px; }
   .skill-list { grid-template-columns: 1fr; }
+  .offer-layout { grid-template-columns: 1fr; gap: 28px; }
+  .offer-aside { position: static; }
+  .nav nav a.navlink { display: none; }
 }
 @media (max-width: 640px) {
   .grid-3 { grid-template-columns: 1fr; }
-  .nav nav a.navlink { display: none; }
+  .skill-split { grid-template-columns: 1fr; }
+  .wordmark span, .persona .faint, .nav nav .btn { display: none; }
+  .nav { gap: 8px; }
+  .nav-left { gap: 8px; }
+  .persona select { max-width: 130px; }
   .cert-meta { grid-template-columns: 1fr 1fr; }
 }
 
