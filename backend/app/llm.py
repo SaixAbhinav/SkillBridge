@@ -18,7 +18,7 @@ def chat_json(system: str, user: str, timeout: float = 20.0) -> dict:
     if not key:
         raise LLMError("LLM_API_KEY is not set")
     base = os.getenv("LLM_BASE_URL", "https://api.groq.com/openai/v1").rstrip("/")
-    model = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
+    model = os.getenv("LLM_MODEL", "openai/gpt-oss-120b")
     try:
         response = httpx.post(
             f"{base}/chat/completions",

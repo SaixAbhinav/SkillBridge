@@ -29,4 +29,4 @@ State is in-memory and resets on every backend restart, so each demo starts clea
 
 ## Stack
 
-FastAPI · Pydantic · React + Vite · Groq (Llama 3.3 70B) via an OpenAI-compatible API
+FastAPI · Pydantic · React + Vite · Groq (GPT-OSS 120B) via an OpenAI-compatible API
