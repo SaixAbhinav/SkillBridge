@@ -61,6 +61,10 @@ The Student's response to an Offer. Accepting makes the Project Assigned; declin
 The state of a Project whose Offer was accepted and whose work is in progress.
 _Avoid_: Hired, in progress
 
+**Message**:
+A note exchanged between the Business and the assigned Student about one Project. The chat opens once the Offer is accepted and becomes read-only at Completion.
+_Avoid_: Chat message, DM, comment
+
 **Completion**:
 The Business confirming delivery and giving a 1–5 rating, which releases the Payout and issues a Certificate.
 _Avoid_: Closing, finishing

@@ -3,7 +3,7 @@ import secrets
 from datetime import date
 from pathlib import Path
 
-from .models import Business, Certificate, Match, Project, Student
+from .models import Business, Certificate, Match, Message, Project, Student
 from .skills import normalize_skill
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -24,6 +24,7 @@ class Store:
         self.projects: dict[str, Project] = {}
         self.certificates: dict[str, Certificate] = {}
         self.matches: dict[str, tuple[list[Match], bool]] = {}
+        self.messages: dict[str, list[Message]] = {}  # project id -> chat thread
 
     def dump(self) -> dict:
         """Everything that can change at runtime (businesses are static seed data)."""
@@ -35,6 +36,7 @@ class Store:
                 k: {"matches": [m.model_dump() for m in ranked], "ai_used": ai_used}
                 for k, (ranked, ai_used) in self.matches.items()
             },
+            "messages": {k: [m.model_dump() for m in thread] for k, thread in self.messages.items()},
         }
 
     def restore(self, state: dict) -> None:
@@ -44,6 +46,8 @@ class Store:
         self.matches = {
             k: ([Match(**m) for m in v["matches"]], v["ai_used"]) for k, v in state["matches"].items()
         }
+        # .get: state saved before chat existed has no "messages" key.
+        self.messages = {k: [Message(**m) for m in v] for k, v in state.get("messages", {}).items()}
 
     def vocabulary(self) -> list[str]:
         return sorted({normalize_skill(k) for s in self.students.values() for k in s.skills})

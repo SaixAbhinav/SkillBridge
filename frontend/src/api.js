@@ -28,6 +28,8 @@ export const api = {
   accept: (id, studentId) => post(`/projects/${id}/accept`, { student_id: studentId }),
   decline: (id, studentId) => post(`/projects/${id}/decline`, { student_id: studentId }),
   complete: (id, rating) => post(`/projects/${id}/complete`, { rating }),
+  messages: (id) => request(`/projects/${id}/messages`),
+  sendMessage: (id, sender, text) => post(`/projects/${id}/messages`, { sender, text }),
   certificate: (id) => request(`/certificates/${id}`),
   reset: () => post('/reset', {}),
 }

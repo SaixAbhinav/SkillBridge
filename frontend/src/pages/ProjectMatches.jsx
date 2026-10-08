@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, SealCheck } from '@phosphor-icons/react'
 import { api } from '../api'
+import ChatBox from '../components/ChatBox'
 import MatchCard from '../components/MatchCard'
 import SkillChips from '../components/SkillChips'
 import { inr } from '../format'
@@ -58,6 +59,8 @@ export default function ProjectMatches() {
   if (!detail) return <div className="narrow"><div className="skeleton" /></div>
 
   const { project, business, offered_student: offered, assigned_student: assigned } = detail
+  // Once a student has accepted, the shortlist is no longer useful: show the chat instead.
+  const hired = Boolean(assigned) && (project.status === 'assigned' || project.status === 'completed')
 
   return (
     <div className="narrow">
@@ -112,6 +115,11 @@ export default function ProjectMatches() {
         </div>
       )}
 
+      {hired && (
+        <ChatBox projectId={project.id} me="business" otherName={assigned.name} readOnly={project.status === 'completed'} />
+      )}
+
+      {!hired && (
       <section className="section">
         <div className="row-between" style={{ marginBottom: 14 }}>
           <h2>Best matches</h2>
@@ -139,6 +147,7 @@ export default function ProjectMatches() {
           ))}
         </div>
       </section>
+      )}
     </div>
   )
 }
