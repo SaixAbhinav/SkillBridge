@@ -56,7 +56,7 @@ def test_full_demo_flow(client):
 
     cert = client.post(f"/api/projects/{project['id']}/complete", json={"rating": 5}).json()
     assert cert["id"].startswith("SB-")
-    assert cert["student_name"] == "Ananya Reddy"
+    assert cert["student_name"] == "Ananya Mishra"
     assert cert["business_name"] == "Spice Route Kitchen"
 
     assert client.get(f"/api/certificates/{cert['id']}").status_code == 200

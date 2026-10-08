@@ -29,7 +29,7 @@ works. Say: "The system is built to degrade gracefully. This is the deterministi
 2. **What if the AI makes things up?** The output is structured JSON validated against a schema, unknown student IDs are dropped, scores are blended with a deterministic score, and there's a fallback on any failure.
 3. **Why would a business trust a student?** Ratings, Certificate-backed portfolio entries and honestly shown skill gaps. Be upfront that skills are self-declared today, and that skill tests and escrow are future scope.
 3a. **What if the student is busy?** They decline the Offer, the Project reopens, and the business offers the next Match.
-3b. **Can a newcomer with no rating ever win?** Yes. Unrated students get a neutral 3/5 rating, not zero (point at Harsha's profile).
+3b. **Can a newcomer with no rating ever win?** Yes. Unrated students get a neutral 3/5 rating, not zero (point at Harsh's profile).
 3c. **What happens to certificates if the server restarts?** This prototype keeps data in memory. Production would use a database.
 4. **How do you make money?** A 10% platform fee on every completed project (shown live in the demo), plus business subscriptions.
 5. **How is this different from Internshala/Fiverr?** Short paid projects, AI matching from plain English, beginner-friendly, verified portfolio.

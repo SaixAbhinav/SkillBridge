@@ -4,7 +4,7 @@ import re
 def test_seed_data_loads(store):
     assert len(store.students) == 16
     assert len(store.businesses) == 5
-    assert store.students["S01"].name == "Ananya Reddy"
+    assert store.students["S01"].name == "Ananya Mishra"
     assert store.projects == {}
 
 

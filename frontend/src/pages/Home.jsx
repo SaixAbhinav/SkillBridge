@@ -9,7 +9,7 @@ import { homeFor, useSession } from '../session'
 // A real match from the seeded restaurant demo, rendered with the same component the app uses.
 const EXAMPLE_MATCH = {
   student_id: 'S01',
-  student_name: 'Ananya Reddy',
+  student_name: 'Ananya Mishra',
   college: 'CBIT',
   match_percent: 87,
   matched_skills: ['html', 'css', 'javascript', 'responsive design', 'whatsapp api'],
