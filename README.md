@@ -29,7 +29,7 @@ State is in-memory and resets on every backend restart, so each demo starts clea
 
 ## Deploy on Vercel
 
-The FastAPI app and the built React frontend deploy together as one Vercel project (`pyproject.toml` at the root points Vercel at `backend/app/main.py`; `vercel.json` builds the frontend).
+The repo deploys as one Vercel project with two [services](https://vercel.com/docs/services), defined in `vercel.json`: `backend` (FastAPI, public at `/api/*`) and `frontend` (Vite, public at every other path, with deep links falling back to `index.html`). The browser calls `/api` on the same domain, so no service bindings are needed.
 
 1. Import this repository in Vercel and keep the root directory as the project root.
 2. In the project's **Storage** tab, add **Upstash Redis** and connect it. This injects `KV_REST_API_URL` and `KV_REST_API_TOKEN`, which the app uses to share state between serverless instances. Without it, state is kept per instance and the demo flow breaks.
