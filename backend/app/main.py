@@ -1,6 +1,7 @@
 import json
 from datetime import date, datetime
 from pathlib import Path
+from typing import Literal
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
@@ -9,7 +10,7 @@ from pydantic import BaseModel, Field
 
 from . import ai, llm, persistence
 from .matching import rank_candidates
-from .models import Certificate, PortfolioItem, Project, ProjectCreate
+from .models import Certificate, Message, PortfolioItem, Project, ProjectCreate
 from .store import Store
 
 load_dotenv()
@@ -27,6 +28,11 @@ class StudentRef(BaseModel):
 
 class CompleteRequest(BaseModel):
     rating: int = Field(ge=1, le=5)
+
+
+class MessageRequest(BaseModel):
+    sender: Literal["business", "student"]
+    text: str = Field(max_length=1000)
 
 
 def create_app(store: Store | None = None) -> FastAPI:
@@ -208,6 +214,29 @@ def create_app(store: Store | None = None) -> FastAPI:
         project.status = "completed"
         project.certificate_id = cert.id
         return cert
+
+    @app.get("/api/projects/{project_id}/messages")
+    def list_messages(project_id: str):
+        get_or_404(store.projects, project_id, "Project")
+        return store.messages.get(project_id, [])
+
+    @app.post("/api/projects/{project_id}/messages", status_code=201)
+    def send_message(project_id: str, body: MessageRequest) -> Message:
+        project = get_or_404(store.projects, project_id, "Project")
+        if project.status != "assigned":
+            raise HTTPException(409, "Chat is open only while the project is in progress")
+        text = body.text.strip()
+        if not text:
+            raise HTTPException(422, "Message is empty")
+        thread = store.messages.setdefault(project_id, [])
+        message = Message(
+            id=f"M{len(thread) + 1}",
+            sender=body.sender,
+            text=text,
+            sent_at=datetime.now().isoformat(timespec="seconds"),
+        )
+        thread.append(message)
+        return message
 
     @app.get("/api/certificates/{cert_id}")
     def get_certificate(cert_id: str):

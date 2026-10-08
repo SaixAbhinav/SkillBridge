@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Check, SealCheck, Warning } from '@phosphor-icons/react'
 import { api } from '../api'
+import ChatBox from '../components/ChatBox'
 import SkillChips from '../components/SkillChips'
 import { useSession } from '../session'
 import { PLATFORM_FEE_RATE, inr, payoutFor } from '../format'
@@ -88,6 +89,10 @@ export default function OfferDetail() {
 
       <div className="offer-layout">
         <div className="offer-main">
+          {project.status !== 'offered' && (
+            <ChatBox projectId={project.id} me="student" otherName={business.name} readOnly={project.status === 'completed'} />
+          )}
+
           <section>
             <h2>What {business.name} wrote</h2>
             <blockquote className="quote">{project.description}</blockquote>

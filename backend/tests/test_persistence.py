@@ -30,6 +30,8 @@ def test_store_dump_restore_roundtrip(store):
     project = post_project(client)
     client.get(f"/api/projects/{project['id']}/matches")
     client.post(f"/api/projects/{project['id']}/offer", json={"student_id": "S01"})
+    client.post(f"/api/projects/{project['id']}/accept", json={"student_id": "S01"})
+    client.post(f"/api/projects/{project['id']}/messages", json={"sender": "business", "text": "Welcome!"})
 
     copy = type(store)()
     copy.restore(store.dump())

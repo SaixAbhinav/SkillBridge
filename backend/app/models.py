@@ -71,6 +71,13 @@ class Match(BaseModel):
     ai_ranked: bool = False
 
 
+class Message(BaseModel):
+    id: str
+    sender: Literal["business", "student"]
+    text: str
+    sent_at: str
+
+
 class Certificate(BaseModel):
     id: str
     student_id: str

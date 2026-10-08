@@ -131,3 +131,36 @@ def test_student_projects_grouped_by_stage(client):
     stages = client.get("/api/students/S01/projects").json()
     assert stages["active"] == [] and [c["project"]["id"] for c in stages["completed"]] == [pid]
     assert client.get("/api/students/S99/projects").status_code == 404
+
+
+def test_chat_opens_once_student_accepts(client):
+    pid = post_restaurant_project(client)["id"]
+    hello = {"sender": "business", "text": "Hi Ananya, welcome aboard!"}
+    assert client.post(f"/api/projects/{pid}/messages", json=hello).status_code == 409
+
+    client.post(f"/api/projects/{pid}/offer", json={"student_id": "S01"})
+    assert client.post(f"/api/projects/{pid}/messages", json=hello).status_code == 409
+
+    client.post(f"/api/projects/{pid}/accept", json={"student_id": "S01"})
+    assert client.post(f"/api/projects/{pid}/messages", json=hello).status_code == 201
+    reply = client.post(f"/api/projects/{pid}/messages", json={"sender": "student", "text": "  Thanks! Starting today.  "})
+    assert reply.json()["text"] == "Thanks! Starting today."
+
+    thread = client.get(f"/api/projects/{pid}/messages").json()
+    assert [(m["sender"], m["text"]) for m in thread] == [
+        ("business", "Hi Ananya, welcome aboard!"),
+        ("student", "Thanks! Starting today."),
+    ]
+
+
+def test_chat_rejects_blank_and_closes_after_completion(client):
+    pid = post_restaurant_project(client)["id"]
+    client.post(f"/api/projects/{pid}/offer", json={"student_id": "S01"})
+    client.post(f"/api/projects/{pid}/accept", json={"student_id": "S01"})
+    assert client.post(f"/api/projects/{pid}/messages", json={"sender": "student", "text": "   "}).status_code == 422
+    assert client.post(f"/api/projects/{pid}/messages", json={"sender": "admin", "text": "hi"}).status_code == 422
+
+    client.post(f"/api/projects/{pid}/messages", json={"sender": "student", "text": "Done, site is live."})
+    client.post(f"/api/projects/{pid}/complete", json={"rating": 5})
+    assert client.post(f"/api/projects/{pid}/messages", json={"sender": "business", "text": "Thanks"}).status_code == 409
+    assert len(client.get(f"/api/projects/{pid}/messages").json()) == 1
