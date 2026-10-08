@@ -32,9 +32,9 @@ State is in-memory and resets on every backend restart, so each demo starts clea
 The repo deploys as one Vercel project with two [services](https://vercel.com/docs/services), defined in `vercel.json`: `backend` (FastAPI, public at `/api/*`) and `frontend` (Vite, public at every other path, with deep links falling back to `index.html`). The browser calls `/api` on the same domain, so no service bindings are needed.
 
 1. Import this repository in Vercel and keep the root directory as the project root.
-2. In the project's **Storage** tab, add **Upstash Redis** and connect it. This injects `KV_REST_API_URL` and `KV_REST_API_TOKEN`, which the app uses to share state between serverless instances. Without it, state is kept per instance and the demo flow breaks.
+2. From the [Vercel Marketplace](https://vercel.com/marketplace/upstash), install **Upstash for Redis** (free plan) and connect it to the project with no env var prefix. This injects `KV_REST_API_URL` and `KV_REST_API_TOKEN`, which the app uses to share state between serverless instances. A database created directly on upstash.com also works: add its REST URL and token as `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`. Without Redis, state is kept per instance and the demo flow breaks.
 3. Add the environment variables `LLM_API_KEY`, `LLM_BASE_URL` and `LLM_MODEL` (same values as `.env`).
-4. Deploy. Use **Reset demo data** in the footer to clear posted projects before a demo.
+4. Deploy (or redeploy, if you added the variables after the first deploy). Use **Reset demo data** in the footer to clear posted projects before a demo.
 
 ## Stack
 
