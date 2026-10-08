@@ -27,6 +27,15 @@ Tests: `cd backend && uv run pytest`
 
 State is in-memory and resets on every backend restart, so each demo starts clean.
 
+## Deploy on Vercel
+
+The FastAPI app and the built React frontend deploy together as one Vercel project (`pyproject.toml` at the root points Vercel at `backend/app/main.py`; `vercel.json` builds the frontend).
+
+1. Import this repository in Vercel and keep the root directory as the project root.
+2. In the project's **Storage** tab, add **Upstash Redis** and connect it. This injects `KV_REST_API_URL` and `KV_REST_API_TOKEN`, which the app uses to share state between serverless instances. Without it, state is kept per instance and the demo flow breaks.
+3. Add the environment variables `LLM_API_KEY`, `LLM_BASE_URL` and `LLM_MODEL` (same values as `.env`).
+4. Deploy. Use **Reset demo data** in the footer to clear posted projects before a demo.
+
 ## Stack
 
-FastAPI · Pydantic · React + Vite · Groq (Llama 3.3 70B) via an OpenAI-compatible API
+FastAPI · Pydantic · React + Vite · Groq (GPT-OSS 120B) via an OpenAI-compatible API

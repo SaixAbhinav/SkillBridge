@@ -10,16 +10,40 @@ DATA_DIR = Path(__file__).parent / "data"
 
 
 class Store:
-    """In-memory state. Reloaded from seed JSON on every start, so demos always begin clean."""
+    """In-memory state seeded from JSON. dump()/restore() let it be persisted between serverless calls."""
 
     def __init__(self, data_dir: Path = DATA_DIR):
-        students = json.loads((data_dir / "students.json").read_text(encoding="utf-8"))
-        businesses = json.loads((data_dir / "businesses.json").read_text(encoding="utf-8"))
+        self.data_dir = data_dir
+        self.reset()
+
+    def reset(self) -> None:
+        students = json.loads((self.data_dir / "students.json").read_text(encoding="utf-8"))
+        businesses = json.loads((self.data_dir / "businesses.json").read_text(encoding="utf-8"))
         self.students: dict[str, Student] = {s["id"]: Student(**s) for s in students}
         self.businesses: dict[str, Business] = {b["id"]: Business(**b) for b in businesses}
         self.projects: dict[str, Project] = {}
         self.certificates: dict[str, Certificate] = {}
         self.matches: dict[str, tuple[list[Match], bool]] = {}
+
+    def dump(self) -> dict:
+        """Everything that can change at runtime (businesses are static seed data)."""
+        return {
+            "students": {k: v.model_dump() for k, v in self.students.items()},
+            "projects": {k: v.model_dump() for k, v in self.projects.items()},
+            "certificates": {k: v.model_dump() for k, v in self.certificates.items()},
+            "matches": {
+                k: {"matches": [m.model_dump() for m in ranked], "ai_used": ai_used}
+                for k, (ranked, ai_used) in self.matches.items()
+            },
+        }
+
+    def restore(self, state: dict) -> None:
+        self.students = {k: Student(**v) for k, v in state["students"].items()}
+        self.projects = {k: Project(**v) for k, v in state["projects"].items()}
+        self.certificates = {k: Certificate(**v) for k, v in state["certificates"].items()}
+        self.matches = {
+            k: ([Match(**m) for m in v["matches"]], v["ai_used"]) for k, v in state["matches"].items()
+        }
 
     def vocabulary(self) -> list[str]:
         return sorted({normalize_skill(k) for s in self.students.values() for k in s.skills})

@@ -28,4 +28,5 @@ export const api = {
   decline: (id, studentId) => post(`/projects/${id}/decline`, { student_id: studentId }),
   complete: (id, rating) => post(`/projects/${id}/complete`, { rating }),
   certificate: (id) => request(`/certificates/${id}`),
+  reset: () => post('/reset', {}),
 }

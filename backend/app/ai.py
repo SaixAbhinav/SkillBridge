@@ -55,7 +55,8 @@ project and candidate students (already pre-filtered by skills), judge how well 
 deliver THIS project. Weigh skill depth, relevant past projects and bio, not just keyword overlap. \
 Respond with JSON only:
 {"rankings": [{"student_id": "...", "fit_score": 0-100,
-"reason": "one sentence, max 25 words, cite concrete evidence from the profile",
+"reason": "one sentence, max 25 words, cite concrete evidence from the profile in plain words \
+(no numeric skill levels, no dashes)",
 "gaps": ["required skill the student lacks", ...]}]}
 Include every candidate exactly once. Never invent students or skills."""
 

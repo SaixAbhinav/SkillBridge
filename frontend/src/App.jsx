@@ -1,4 +1,11 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
+import { api } from './api'
+
+async function resetDemo() {
+  if (!window.confirm('Clear all posted projects, offers and certificates?')) return
+  await api.reset()
+  window.location.assign('/')
+}
 
 export default function App() {
   return (
@@ -14,8 +21,8 @@ export default function App() {
         <Outlet />
       </main>
       <footer className="footer no-print">
-        <span>SkillBridge AI, a course prototype</span>
-        <span>Payments on this demo are simulated</span>
+        <span>SkillBridge AI, a course prototype. Payments are simulated.</span>
+        <button type="button" className="link" onClick={resetDemo}>Reset demo data</button>
       </footer>
     </>
   )
