@@ -41,14 +41,14 @@ def test_full_demo_flow(client):
 
     offered = client.post(f"/api/projects/{project['id']}/offer", json={"student_id": "S01"})
     assert offered.json()["status"] == "offered"
-    inbox = client.get("/api/students/S01/offers").json()
+    inbox = client.get("/api/students/S01/projects").json()["offers"]
     assert [o["project"]["id"] for o in inbox] == [project["id"]]
     assert inbox[0]["business"]["name"] == "Spice Route Kitchen"
 
     accepted = client.post(f"/api/projects/{project['id']}/accept", json={"student_id": "S01"})
     assert accepted.json()["status"] == "assigned"
     assert accepted.json()["assigned_student_id"] == "S01"
-    assert client.get("/api/students/S01/offers").json() == []
+    assert client.get("/api/students/S01/projects").json()["offers"] == []
 
     cert = client.post(f"/api/projects/{project['id']}/complete", json={"rating": 5}).json()
     assert cert["id"].startswith("SB-")
@@ -106,3 +106,28 @@ def test_unknown_ids_return_404(client):
     assert client.get("/api/projects/P999").status_code == 404
     assert client.get("/api/students/S999").status_code == 404
     assert client.get("/api/certificates/SB-0000-000000").status_code == 404
+
+
+def test_business_projects_lists_only_that_business(client):
+    project = post_restaurant_project(client)
+    assert [p["id"] for p in client.get("/api/businesses/B01/projects").json()] == [project["id"]]
+    assert client.get("/api/businesses/B02/projects").json() == []
+    assert client.get("/api/businesses/B99/projects").status_code == 404
+
+
+def test_student_projects_grouped_by_stage(client):
+    pid = post_restaurant_project(client)["id"]
+    client.post(f"/api/projects/{pid}/offer", json={"student_id": "S01"})
+    stages = client.get("/api/students/S01/projects").json()
+    assert [o["project"]["id"] for o in stages["offers"]] == [pid]
+    assert stages["offers"][0]["business"]["name"] == "Spice Route Kitchen"
+    assert stages["active"] == [] and stages["completed"] == []
+
+    client.post(f"/api/projects/{pid}/accept", json={"student_id": "S01"})
+    stages = client.get("/api/students/S01/projects").json()
+    assert stages["offers"] == [] and [a["project"]["id"] for a in stages["active"]] == [pid]
+
+    client.post(f"/api/projects/{pid}/complete", json={"rating": 5})
+    stages = client.get("/api/students/S01/projects").json()
+    assert stages["active"] == [] and [c["project"]["id"] for c in stages["completed"]] == [pid]
+    assert client.get("/api/students/S99/projects").status_code == 404

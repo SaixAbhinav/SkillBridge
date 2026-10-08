@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { ArrowRight } from '@phosphor-icons/react'
 import { api } from '../api'
 import MatchCard from '../components/MatchCard'
 import { inr } from '../format'
+import { homeFor, useSession } from '../session'
 
 // A real match from the seeded restaurant demo, rendered with the same component the app uses.
 const EXAMPLE_MATCH = {
@@ -24,7 +25,14 @@ const STEPS = [
 ]
 
 export default function Home() {
+  const session = useSession()
+  const navigate = useNavigate()
   const [stats, setStats] = useState(null)
+
+  function enter(mode) {
+    session.update({ mode })
+    navigate(homeFor(mode))
+  }
 
   useEffect(() => {
     api.stats().then(setStats).catch(() => setStats(null))
@@ -37,8 +45,8 @@ export default function Home() {
           <h1>Every fresher needs a <em>first real project.</em></h1>
           <p className="lead">Companies want experience. We match college students to short, paid projects from local businesses, so they can get it.</p>
           <div className="row">
-            <Link className="btn primary" to="/post">Post a project <ArrowRight size={16} weight="bold" /></Link>
-            <Link className="btn" to="/students">Browse students</Link>
+            <button className="btn primary" onClick={() => enter('business')}>I'm a business <ArrowRight size={16} weight="bold" /></button>
+            <button className="btn" onClick={() => enter('student')}>I'm a student</button>
           </div>
         </div>
         <div className="hero-preview reveal" style={{ '--i': 2 }}>

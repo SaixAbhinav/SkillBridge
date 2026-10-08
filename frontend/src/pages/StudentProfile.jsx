@@ -1,42 +1,21 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { SealCheck } from '@phosphor-icons/react'
 import { api } from '../api'
 import SkillChips from '../components/SkillChips'
 import { Avatar, Rating } from '../components/bits'
-import { inr } from '../format'
 
 const LEVELS = ['', 'Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert']
 
+// Public profile, as a business sees it. Offers are handled in the student view (/student).
 export default function StudentProfile() {
   const { id } = useParams()
-  const navigate = useNavigate()
   const [s, setS] = useState(null)
-  const [offers, setOffers] = useState([])
-  const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
     api.student(id).then(setS).catch((e) => setError(e.message))
-    api.studentOffers(id).then(setOffers).catch((e) => setError(e.message))
   }, [id])
-
-  async function respond(projectId, accept) {
-    setBusy(true)
-    try {
-      if (accept) {
-        await api.accept(projectId, id)
-        navigate(`/projects/${projectId}`)
-      } else {
-        await api.decline(projectId, id)
-        setOffers(await api.studentOffers(id))
-        setBusy(false)
-      }
-    } catch (e) {
-      setError(e.message)
-      setBusy(false)
-    }
-  }
 
   if (error) return <div className="narrow"><p className="error">{error}</p></div>
   if (!s) return <div className="narrow"><div className="skeleton" /></div>
@@ -45,25 +24,6 @@ export default function StudentProfile() {
 
   return (
     <div className="narrow">
-      {offers.map(({ project, business }) => (
-        <div className="callout reveal" key={project.id}>
-          <div className="row-between">
-            <div>
-              <p className="small muted">New offer from {business.name}</p>
-              <h2>{project.title}</h2>
-            </div>
-            <div className="facts">
-              <span><b>{inr(project.budget_inr)}</b></span>
-              <span><b>{project.duration_weeks} wk</b></span>
-            </div>
-          </div>
-          <div className="row">
-            <button className="btn primary" disabled={busy} onClick={() => respond(project.id, true)}>Accept offer</button>
-            <button className="btn" disabled={busy} onClick={() => respond(project.id, false)}>Decline</button>
-          </div>
-        </div>
-      ))}
-
       <div className="profile-head">
         <Avatar name={s.name} large />
         <div>
