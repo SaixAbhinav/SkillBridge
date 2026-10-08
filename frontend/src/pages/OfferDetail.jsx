@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Check, SealCheck, Warning } from '@phosphor-icons/react'
+import { ArrowLeft, Check, Package, SealCheck, Warning } from '@phosphor-icons/react'
 import { api } from '../api'
 import ChatBox from '../components/ChatBox'
 import SkillChips from '../components/SkillChips'
 import { useSession } from '../session'
 import { PLATFORM_FEE_RATE, inr, payoutFor } from '../format'
 
-const STAGE = { offered: 'New offer', assigned: 'In progress', completed: 'Completed' }
+const STAGE = { offered: 'New offer', assigned: 'In progress', delivered: 'Delivered', completed: 'Completed' }
 
 export default function OfferDetail() {
   const { id } = useParams()
@@ -16,6 +16,7 @@ export default function OfferDetail() {
   const [detail, setDetail] = useState(null)
   const [student, setStudent] = useState(null)
   const [match, setMatch] = useState(null)
+  const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -35,6 +36,19 @@ export default function OfferDetail() {
       setStudent(await api.student(studentId))
     } catch (e) {
       setError(e.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function deliver(e) {
+    e.preventDefault()
+    setBusy(true)
+    try {
+      setDetail({ ...detail, project: await api.deliver(id, studentId, note) })
+      setNote('')
+    } catch (err) {
+      setError(err.message)
     } finally {
       setBusy(false)
     }
@@ -143,7 +157,26 @@ export default function OfferDetail() {
               </>
             )}
             {project.status === 'assigned' && (
-              <p className="small muted">You accepted this. {business.name} marks it complete when you deliver, which releases your payout and issues a certificate.</p>
+              <form className="form" onSubmit={deliver}>
+                <label className="field">
+                  <span>Finished the work?</span>
+                  <textarea
+                    rows={3}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    maxLength={1000}
+                    placeholder="What you delivered, and a link if there is one"
+                  />
+                  <small>{business.name} reviews it, then approves (releasing your payout) or asks for changes.</small>
+                </label>
+                <button className="btn primary" disabled={busy}><Package size={16} weight="fill" /> Mark as delivered</button>
+              </form>
+            )}
+            {project.status === 'delivered' && (
+              <div className="delivered">
+                <p><strong>Waiting for {business.name} to review</strong></p>
+                {project.delivery_note && <p className="small muted">Your note: {project.delivery_note}</p>}
+              </div>
             )}
             {project.status === 'completed' && (
               <Link className="btn" to={`/certificate/${project.certificate_id}`}><SealCheck size={16} weight="fill" /> View certificate</Link>

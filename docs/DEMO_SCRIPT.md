@@ -13,7 +13,9 @@ close other tabs, zoom the browser to 125%.
 4. Offer + accept (50s): Send offer to #1 → "Students aren't assigned; they choose." → "Switch to Ananya's view"
    (the nav flips to Student) → walk the offer page: what the business wrote, skills she has vs new for her,
    why she was matched, her payout after the 10% fee → "Accept offer". Flip back with the Business toggle.
-5. Complete (25s): "Your projects" → open it → "Two weeks later the site is delivered" → 5 out of 5 → "Mark complete" → point at the split:
+5. Deliver + complete (40s): still as Ananya, type a short note ("Site is live, link in chat") → "Mark as delivered".
+   Flip to Business → "Your projects" shows "Ready for review" → open it → read her note → 5 out of 5 →
+   "Approve and complete" → point at the split:
    "₹7,200 to Ananya, ₹800 platform fee. That's our business model, live."
 6. Certificate (30s): View certificate → "A certificate with a unique ID that anyone can check at this link."
    Click View portfolio → "It shows up as a Verified entry in her portfolio. That's real experience."

@@ -50,6 +50,10 @@ def test_full_demo_flow(client):
     assert accepted.json()["assigned_student_id"] == "S01"
     assert client.get("/api/students/S01/projects").json()["offers"] == []
 
+    delivered = client.post(f"/api/projects/{project['id']}/deliver", json={"student_id": "S01", "note": "Live at spiceroute.example"})
+    assert delivered.json()["status"] == "delivered"
+    assert delivered.json()["delivery_note"] == "Live at spiceroute.example"
+
     cert = client.post(f"/api/projects/{project['id']}/complete", json={"rating": 5}).json()
     assert cert["id"].startswith("SB-")
     assert cert["student_name"] == "Ananya Reddy"
@@ -96,10 +100,39 @@ def test_decline_reopens_and_blocks_reoffer(client):
     assert client.post(f"/api/projects/{pid}/offer", json={"student_id": "S12"}).status_code == 200
 
 
-def test_complete_requires_assignment(client):
-    project = post_restaurant_project(client)
-    response = client.post(f"/api/projects/{project['id']}/complete", json={"rating": 5})
-    assert response.status_code == 409
+def test_complete_requires_delivery(client):
+    pid = post_restaurant_project(client)["id"]
+    assert client.post(f"/api/projects/{pid}/complete", json={"rating": 5}).status_code == 409
+    client.post(f"/api/projects/{pid}/offer", json={"student_id": "S01"})
+    client.post(f"/api/projects/{pid}/accept", json={"student_id": "S01"})
+    assert client.post(f"/api/projects/{pid}/complete", json={"rating": 5}).status_code == 409
+
+
+def test_only_the_assigned_student_can_deliver(client):
+    pid = post_restaurant_project(client)["id"]
+    assert client.post(f"/api/projects/{pid}/deliver", json={"student_id": "S01", "note": ""}).status_code == 409
+    client.post(f"/api/projects/{pid}/offer", json={"student_id": "S01"})
+    client.post(f"/api/projects/{pid}/accept", json={"student_id": "S01"})
+    assert client.post(f"/api/projects/{pid}/deliver", json={"student_id": "S02", "note": ""}).status_code == 409
+    ok = client.post(f"/api/projects/{pid}/deliver", json={"student_id": "S01", "note": "  "})
+    assert ok.status_code == 200 and ok.json()["delivery_note"] is None
+    assert client.post(f"/api/projects/{pid}/deliver", json={"student_id": "S01", "note": ""}).status_code == 409
+
+
+def test_request_changes_reopens_work_and_tells_the_student(client):
+    pid = post_restaurant_project(client)["id"]
+    client.post(f"/api/projects/{pid}/offer", json={"student_id": "S01"})
+    client.post(f"/api/projects/{pid}/accept", json={"student_id": "S01"})
+    assert client.post(f"/api/projects/{pid}/request-changes", json={"note": "Too early"}).status_code == 409
+
+    client.post(f"/api/projects/{pid}/deliver", json={"student_id": "S01", "note": "Done"})
+    assert client.post(f"/api/projects/{pid}/request-changes", json={"note": "   "}).status_code == 422
+    back = client.post(f"/api/projects/{pid}/request-changes", json={"note": "Please add the dessert menu."}).json()
+    assert back["status"] == "assigned" and back["delivery_note"] is None
+
+    thread = client.get(f"/api/projects/{pid}/messages").json()
+    assert (thread[-1]["sender"], thread[-1]["text"]) == ("business", "Changes requested: Please add the dessert menu.")
+    assert [a["project"]["id"] for a in client.get("/api/students/S01/projects").json()["active"]] == [pid]
 
 
 def test_unknown_ids_return_404(client):
@@ -126,6 +159,10 @@ def test_student_projects_grouped_by_stage(client):
     client.post(f"/api/projects/{pid}/accept", json={"student_id": "S01"})
     stages = client.get("/api/students/S01/projects").json()
     assert stages["offers"] == [] and [a["project"]["id"] for a in stages["active"]] == [pid]
+
+    client.post(f"/api/projects/{pid}/deliver", json={"student_id": "S01", "note": "Done"})
+    stages = client.get("/api/students/S01/projects").json()
+    assert [a["project"]["id"] for a in stages["active"]] == [pid]  # awaiting review still counts as active
 
     client.post(f"/api/projects/{pid}/complete", json={"rating": 5})
     stages = client.get("/api/students/S01/projects").json()
@@ -161,6 +198,8 @@ def test_chat_rejects_blank_and_closes_after_completion(client):
     assert client.post(f"/api/projects/{pid}/messages", json={"sender": "admin", "text": "hi"}).status_code == 422
 
     client.post(f"/api/projects/{pid}/messages", json={"sender": "student", "text": "Done, site is live."})
+    client.post(f"/api/projects/{pid}/deliver", json={"student_id": "S01", "note": ""})
+    assert client.post(f"/api/projects/{pid}/messages", json={"sender": "business", "text": "Reviewing now"}).status_code == 201
     client.post(f"/api/projects/{pid}/complete", json={"rating": 5})
     assert client.post(f"/api/projects/{pid}/messages", json={"sender": "business", "text": "Thanks"}).status_code == 409
-    assert len(client.get(f"/api/projects/{pid}/messages").json()) == 1
+    assert len(client.get(f"/api/projects/{pid}/messages").json()) == 2

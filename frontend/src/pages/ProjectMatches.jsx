@@ -16,6 +16,8 @@ export default function ProjectMatches() {
   const [matches, setMatches] = useState(null)
   const [aiUsed, setAiUsed] = useState(false)
   const [rating, setRating] = useState(5)
+  const [changesOpen, setChangesOpen] = useState(false)
+  const [changes, setChanges] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -44,6 +46,21 @@ export default function ProjectMatches() {
     navigate(`/student/projects/${id}`)
   }
 
+  async function requestChanges(e) {
+    e.preventDefault()
+    setBusy(true)
+    try {
+      await api.requestChanges(id, changes)
+      setDetail(await api.project(id))
+      setChanges('')
+      setChangesOpen(false)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   async function complete() {
     setBusy(true)
     try {
@@ -60,7 +77,7 @@ export default function ProjectMatches() {
 
   const { project, business, offered_student: offered, assigned_student: assigned } = detail
   // Once a student has accepted, the shortlist is no longer useful: show the chat instead.
-  const hired = Boolean(assigned) && (project.status === 'assigned' || project.status === 'completed')
+  const hired = Boolean(assigned) && ['assigned', 'delivered', 'completed'].includes(project.status)
 
   return (
     <div className="narrow">
@@ -93,13 +110,42 @@ export default function ProjectMatches() {
       {project.status === 'assigned' && assigned && (
         <div className="callout reveal">
           <h2>{assigned.name} is working on this</h2>
-          <p className="muted">When the work is delivered, rate it. That releases the payout and issues a certificate.</p>
-          <div className="row">
-            <select value={rating} onChange={(e) => setRating(Number(e.target.value))} aria-label="Rating">
-              {[5, 4, 3, 2, 1].map((r) => <option key={r} value={r}>{r} out of 5</option>)}
-            </select>
-            <button className="btn primary" disabled={busy} onClick={complete}>Mark complete</button>
-          </div>
+          <p className="muted">
+            You can review and rate the work once {assigned.name.split(' ')[0]} marks it as delivered. Use the chat below in the meantime.
+          </p>
+        </div>
+      )}
+
+      {project.status === 'delivered' && assigned && (
+        <div className="callout reveal">
+          <h2>{assigned.name} delivered the work</h2>
+          {project.delivery_note
+            ? <blockquote className="quote">{project.delivery_note}</blockquote>
+            : <p className="muted">No delivery note. Ask in the chat if you need details.</p>}
+          {changesOpen ? (
+            <form className="form" onSubmit={requestChanges}>
+              <label className="field">
+                <span>What needs to change?</span>
+                <textarea rows={3} value={changes} onChange={(e) => setChanges(e.target.value)} maxLength={1000} />
+                <small>This is sent to {assigned.name.split(' ')[0]} in the chat, and the project goes back to in progress.</small>
+              </label>
+              <div className="row">
+                <button className="btn primary" disabled={busy || !changes.trim()}>Send request</button>
+                <button type="button" className="btn" onClick={() => setChangesOpen(false)}>Cancel</button>
+              </div>
+            </form>
+          ) : (
+            <>
+              <p className="muted">Approve it to release the payout and issue a certificate.</p>
+              <div className="row">
+                <select value={rating} onChange={(e) => setRating(Number(e.target.value))} aria-label="Rating">
+                  {[5, 4, 3, 2, 1].map((r) => <option key={r} value={r}>{r} out of 5</option>)}
+                </select>
+                <button className="btn primary" disabled={busy} onClick={complete}>Approve and complete</button>
+                <button className="btn" disabled={busy} onClick={() => setChangesOpen(true)}>Request changes</button>
+              </div>
+            </>
+          )}
         </div>
       )}
 
