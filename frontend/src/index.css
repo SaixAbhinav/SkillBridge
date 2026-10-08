@@ -250,6 +250,9 @@ a.name:hover { color: var(--accent); }
 .warn { display: flex; gap: 6px; align-items: flex-start; color: var(--accent); margin-top: 10px; }
 .warn svg { flex: none; margin-top: 3px; }
 .aside-actions { display: grid; gap: 8px; margin-top: 18px; }
+.aside-actions textarea { min-height: 84px; }
+.delivered { display: grid; gap: 6px; padding: 12px 14px; border-radius: var(--radius); background: var(--accent-soft); border: 1px solid var(--accent); }
+.callout .quote { font-size: 0.98rem; }
 
 /* ---------- Chat ---------- */
 .chat { display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-top: 20px; }

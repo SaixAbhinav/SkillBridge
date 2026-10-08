@@ -81,7 +81,15 @@ export default function StudentHome() {
             <h2>In progress</h2>
             {work.active.length === 0
               ? <p className="muted">Nothing in progress. Accepted offers show up here.</p>
-              : <div className="list">{work.active.map((w) => <WorkRow key={w.project.id} {...w} />)}</div>}
+              : (
+                <div className="list">
+                  {work.active.map((w) => (
+                    <WorkRow key={w.project.id} {...w}>
+                      {w.project.status === 'delivered' && <span className="tag">Waiting for review</span>}
+                    </WorkRow>
+                  ))}
+                </div>
+              )}
           </section>
 
           <section className="section">

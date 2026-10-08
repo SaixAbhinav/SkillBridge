@@ -49,10 +49,11 @@ class ProjectCreate(Requirements):
 
 class Project(ProjectCreate):
     id: str
-    status: Literal["open", "offered", "assigned", "completed"] = "open"
+    status: Literal["open", "offered", "assigned", "delivered", "completed"] = "open"
     offered_student_id: str | None = None
     declined_student_ids: list[str] = []
     assigned_student_id: str | None = None
+    delivery_note: str | None = None
     certificate_id: str | None = None
     student_payout_inr: int | None = None
     platform_fee_inr: int | None = None

@@ -16,6 +16,7 @@ from .store import Store
 load_dotenv()
 DIST_DIR = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 PLATFORM_FEE_RATE = 0.10
+IN_PROGRESS = ("assigned", "delivered")  # the student is on the project; chat is open
 
 
 class ExtractRequest(BaseModel):
@@ -28,6 +29,15 @@ class StudentRef(BaseModel):
 
 class CompleteRequest(BaseModel):
     rating: int = Field(ge=1, le=5)
+
+
+class DeliverRequest(BaseModel):
+    student_id: str
+    note: str = Field(default="", max_length=1000)
+
+
+class ChangesRequest(BaseModel):
+    note: str = Field(max_length=1000)
 
 
 class MessageRequest(BaseModel):
@@ -96,7 +106,7 @@ def create_app(store: Store | None = None) -> FastAPI:
         newest = sorted(store.projects.values(), key=lambda p: p.created_at, reverse=True)
         return {
             "offers": [with_business(p) for p in newest if p.status == "offered" and p.offered_student_id == student_id],
-            "active": [with_business(p) for p in newest if p.status == "assigned" and p.assigned_student_id == student_id],
+            "active": [with_business(p) for p in newest if p.status in IN_PROGRESS and p.assigned_student_id == student_id],
             "completed": [with_business(p) for p in newest if p.status == "completed" and p.assigned_student_id == student_id],
         }
 
@@ -179,11 +189,44 @@ def create_app(store: Store | None = None) -> FastAPI:
         project.offered_student_id = None
         return project
 
+    def add_message(project_id: str, sender: str, text: str) -> Message:
+        thread = store.messages.setdefault(project_id, [])
+        message = Message(
+            id=f"M{len(thread) + 1}",
+            sender=sender,
+            text=text,
+            sent_at=datetime.now().isoformat(timespec="seconds"),
+        )
+        thread.append(message)
+        return message
+
+    @app.post("/api/projects/{project_id}/deliver")
+    def deliver(project_id: str, body: DeliverRequest) -> Project:
+        project = get_or_404(store.projects, project_id, "Project")
+        if project.status != "assigned" or project.assigned_student_id != body.student_id:
+            raise HTTPException(409, "Only the assigned student can deliver work in progress")
+        project.status = "delivered"
+        project.delivery_note = body.note.strip() or None
+        return project
+
+    @app.post("/api/projects/{project_id}/request-changes")
+    def request_changes(project_id: str, body: ChangesRequest) -> Project:
+        project = get_or_404(store.projects, project_id, "Project")
+        if project.status != "delivered":
+            raise HTTPException(409, "Changes can be requested only after delivery")
+        note = body.note.strip()
+        if not note:
+            raise HTTPException(422, "Say what needs to change")
+        project.status = "assigned"
+        project.delivery_note = None
+        add_message(project_id, "business", f"Changes requested: {note}")
+        return project
+
     @app.post("/api/projects/{project_id}/complete")
     def complete(project_id: str, body: CompleteRequest) -> Certificate:
         project = get_or_404(store.projects, project_id, "Project")
-        if project.status != "assigned":
-            raise HTTPException(409, "Project must be assigned before completion")
+        if project.status != "delivered":
+            raise HTTPException(409, "The student must deliver the work before completion")
         student = store.students[project.assigned_student_id]
         business = store.businesses[project.business_id]
         cert = Certificate(
@@ -223,20 +266,12 @@ def create_app(store: Store | None = None) -> FastAPI:
     @app.post("/api/projects/{project_id}/messages", status_code=201)
     def send_message(project_id: str, body: MessageRequest) -> Message:
         project = get_or_404(store.projects, project_id, "Project")
-        if project.status != "assigned":
+        if project.status not in IN_PROGRESS:
             raise HTTPException(409, "Chat is open only while the project is in progress")
         text = body.text.strip()
         if not text:
             raise HTTPException(422, "Message is empty")
-        thread = store.messages.setdefault(project_id, [])
-        message = Message(
-            id=f"M{len(thread) + 1}",
-            sender=body.sender,
-            text=text,
-            sent_at=datetime.now().isoformat(timespec="seconds"),
-        )
-        thread.append(message)
-        return message
+        return add_message(project_id, body.sender, text)
 
     @app.get("/api/certificates/{cert_id}")
     def get_certificate(cert_id: str):

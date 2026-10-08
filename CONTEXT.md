@@ -61,12 +61,20 @@ The Student's response to an Offer. Accepting makes the Project Assigned; declin
 The state of a Project whose Offer was accepted and whose work is in progress.
 _Avoid_: Hired, in progress
 
+**Delivery**:
+The assigned Student telling the Business the work is done, optionally with a note (what was delivered, a link). The Project becomes **Delivered** and waits for the Business to review it.
+_Avoid_: Submission, hand-in
+
+**Changes requested**:
+The Business sending a Delivered Project back to Assigned, with a note that goes into the chat.
+_Avoid_: Rejection
+
 **Message**:
 A note exchanged between the Business and the assigned Student about one Project. The chat opens once the Offer is accepted and becomes read-only at Completion.
 _Avoid_: Chat message, DM, comment
 
 **Completion**:
-The Business confirming delivery and giving a 1–5 rating, which releases the Payout and issues a Certificate.
+The Business accepting a Delivered Project and giving a 1–5 rating, which releases the Payout and issues a Certificate. Only possible after Delivery.
 _Avoid_: Closing, finishing
 
 ### Money

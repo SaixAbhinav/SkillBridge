@@ -8,6 +8,7 @@ export const STATUS_LABEL = {
   open: 'Choosing a student',
   offered: 'Offer sent',
   assigned: 'In progress',
+  delivered: 'Ready for review',
   completed: 'Completed',
 }
 
