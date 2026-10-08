@@ -1,13 +1,13 @@
+import json
 from datetime import date, datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 
-from . import ai, llm
+from . import ai, llm, persistence
 from .matching import rank_candidates
 from .models import Certificate, PortfolioItem, Project, ProjectCreate
 from .store import Store
@@ -32,6 +32,24 @@ class CompleteRequest(BaseModel):
 def create_app(store: Store | None = None) -> FastAPI:
     store = store or Store()
     app = FastAPI(title="SkillBridge AI")
+
+    @app.middleware("http")
+    async def sync_state(request: Request, call_next):
+        # Serverless instances don't share memory: load the shared state before each API call
+        # and save it afterwards, but only if the call changed something.
+        if not persistence.is_enabled() or not request.url.path.startswith("/api/"):
+            return await call_next(request)
+        saved = await run_in_threadpool(persistence.load)
+        if saved:
+            store.restore(saved)
+        else:
+            store.reset()
+        before = json.dumps(store.dump(), sort_keys=True)
+        response = await call_next(request)
+        after = store.dump()
+        if json.dumps(after, sort_keys=True) != before or saved is None:
+            await run_in_threadpool(persistence.save, after)
+        return response
 
     def get_or_404(collection: dict, key: str, label: str):
         if key not in collection:
@@ -184,16 +202,14 @@ def create_app(store: Store | None = None) -> FastAPI:
     def get_certificate(cert_id: str):
         return get_or_404(store.certificates, cert_id, "Certificate")
 
-    # Production: serve the built React app; unknown paths fall back to index.html (client-side routing).
-    if DIST_DIR.exists():
-        app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
+    @app.post("/api/reset")
+    def reset():
+        store.reset()
+        return {"ok": True}
 
-        @app.get("/{full_path:path}", include_in_schema=False)
-        def spa(full_path: str):
-            file = (DIST_DIR / full_path).resolve()
-            if full_path and file.is_file() and file.is_relative_to(DIST_DIR):
-                return FileResponse(file)
-            return FileResponse(DIST_DIR / "index.html")
+    # Production: serve the built React app; navigation misses fall back to index.html (client-side routing).
+    if DIST_DIR.exists():
+        app.frontend("/", directory=DIST_DIR, fallback="index.html")
 
     return app
 

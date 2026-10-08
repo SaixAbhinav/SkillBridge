@@ -24,5 +24,7 @@ def make_student():
 
 @pytest.fixture(autouse=True)
 def no_llm(monkeypatch):
-    # Tests must never hit the real LLM, even if .env has a key.
-    monkeypatch.delenv("LLM_API_KEY", raising=False)
+    # Tests must never hit the real LLM or Redis, even if .env has keys.
+    for name in ("LLM_API_KEY", "KV_REST_API_URL", "KV_REST_API_TOKEN",
+                 "UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"):
+        monkeypatch.delenv(name, raising=False)
