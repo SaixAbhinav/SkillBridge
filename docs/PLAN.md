@@ -2343,7 +2343,7 @@ Open `http://localhost:8000`. The whole app, including deep links like `/student
 
 ---
 
-### Task 11: Pitch deck (12 slides)
+### Task 11: Pitch deck (DROPPED 2026-10-08: user only needs the working project)
 
 **Files:**
 - Create: `docs/DECK_OUTLINE.md` (the content below), then build the deck from it (Claude Slides artifact → download .pptx, or PowerPoint/Google Slides by hand)
